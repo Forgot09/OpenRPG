@@ -5,9 +5,7 @@ import subprocess as sp
 from random import randrange
 
 datalist = {} #몬스터, 아이템, 무기
-account = [] #닉네임, 레벨, 경험치, 골드, 소지아이템
-
-#datalist = {'monster':[{'슬라임':['1', '뒷산']}]
+account = [] #닉네임, 레벨, 경험치, 골드, 소지무기, 소지아이템
 
 '''
 weapon.dat 형식 : 이름/가격/추가시간
@@ -50,6 +48,9 @@ class Game:
 			print('닉네임을 만들어주세요')
 			username = input('>>>')
 			account.append(username)
+			account.append('1') #레벨
+			account.append('0') #경험치
+			account.append('500') #골드
 	
 	def saveacc(self):
 		savedata = ''
@@ -66,6 +67,7 @@ class ComputeFunc:
 
 town_building = ['집', '대장간', '상점', '던전으로 가기']
 kindof_dungeon = ['뒷산']
+home_content = ['정보 보기', '저장', '저장 및 나가기']
 
 class World:
 	g = Game()
@@ -82,6 +84,23 @@ class World:
 			else:
 				if move_place == '집':
 					print('===집===')
+					mkstring(home_content)
+					ans = input('>>>')
+					if not ans in home_content:
+						print('없는 활동입니다')
+					else:
+						if ans == '정보 보기':
+							print('OpenRPG - v0.02-dev')
+							print('닉네임 : '+account[0])
+							print('레벨 : '+account[1])
+							print('경험치 : '+account[2])
+							print('골드 : '+account[3])
+						elif ans == '저장':
+							g.saveacc()
+							print('저장되었습니다')
+						elif ans == '저장 및 나가기':
+							g.saveacc()
+							sys.exit()
 				elif move_place == '대장간':
 					print('===대장간===')
 				elif move_place == '상점':
@@ -111,9 +130,14 @@ class World:
 				xp = i[name][2]
 				if type in spawnpoint:
 					break
+			if len(account[4]) >= 1:
+				name = list(account[4].keys())[0]
+				weapon_buff = float(account[4][name])
+			else:
+				weapon_buff = 0
 			numsize = '1'+'0'*(int(level) * 2)
-			attack_num = randrange(int(numsize), int('9'*(int(level)*3)))
-			attack_time = (100-int(level))/150
+			attack_num = randrange(int(numsize), int('9'*(int(level)*3)))+weapon_buff
+			attack_time = (100-int(level))/100
 			time.sleep(waiting_time)
 			print('몬스터 출현!')
 			print(name+', '+'Lv.'+level)
@@ -124,6 +148,9 @@ class World:
 			if endtime - starttime <= attack_time:
 				print('승리!')
 				print('보상 : '+xp+'XP')
+				player_xp = int(account[2])
+				player_xp += int(xp)
+				account[2] = str(player_xp)
 			else:
 				print('실패!')
 			print('[C : 계속하기, E : 그만하기]')
@@ -142,7 +169,7 @@ def mkstring(list):
 			string = string+list[i]
 	print('《'+string+'》')
 
-print('=====OpenRPG v0.01-dev=====\n옛날감성 텍스트 RPG')
+print('=====OpenRPG v0.02-dev=====\n옛날감성 텍스트 RPG')
 while 1:
 	print('[S : 게임시작, E : 나가기]')
 	ans = input('>>>')
